@@ -1,0 +1,265 @@
+{
+    public partial class Form1 : Form
+    {
+        public Form1()
+        {
+            InitializeComponent();
+            // before adding this no discount option was checked upon startup (was selected after clear method though) so this is my fix
+            noneDiscountRadioButton.Checked = true; // set discountGroupBox to "none"
+        }
+        // two dimensional array for smoothie cost
+        decimal[,] smoothieListDecimal = { { 5.99M, 6.99M, 7.99M, 8.99M }, { 6.99M, 7.99M, 8.99M, 9.99M } };
+
+        //constants
+        const decimal salesTax = 0.08m;              //sales tax rate
+        const decimal toppings = 0.75m;              //toppings cost
+        const decimal noDiscount = 0.0m;             // no discount amount
+        const decimal preferredDiscount = 0.15m;     //preferred discount ammount 
+        const decimal couponDiscount = 0.10m;        //coupon discount amount
+        int quantity;                                // to hold smoothie quantity
+
+
+        private void Calculate() //create Calculate Method
+        {
+            //Check to see if name is entered in nameTextBox
+            if (nameTextBox.Text == "")
+            {
+                // error message for having nothing in nameTextBox
+                MessageBox.Show("Please Enter Customers Name"); nameTextBox.Select();
+            }
+
+            // Check to see if quantity is entered in quantityTextBox
+            if (quantityTextBox.Text == "")
+            {
+                // error message for not having quantity entered in quantityTextBox
+                MessageBox.Show("Please Enter Quantity Of Smoothies"); quantityTextBox.Select();
+            }
+            else
+            {
+                quantity = int.Parse(quantityTextBox.Text); // set quantity as number entered in quantityTextBox
+            }
+            // check to see if size is selected in sizeComboBox
+            if (sizeComboBox.SelectedItem == null)
+            {
+                // error message for not having size selected in sizeComboBox
+                MessageBox.Show("Please Select Smoothie Size");
+            }
+            // check to see if style is selected in styleComboBox
+            if (styleComboBox.SelectedItem == null)
+            {
+                // error message for not having style selected in styleComboBox
+                MessageBox.Show("Please Select Smoothie Style");
+            }
+            else
+            {
+                decimal smoothieCost;               //to hold Smoothie Cost
+                decimal toppingCost = 0m;           //to hold Topping Amount
+                decimal discountAmount = 0m;        //to hold Discount Amount
+                decimal subtotalAmount;             //to Hold Subtotal
+                decimal taxAmount;                  //to hold Tax Amount
+                decimal totalDue;                   //to hold Total Amount Due
+                int x = 0, y = 0;                   //X=Style Y=Size
+
+                //find Style based on styleComboBox
+                if (styleComboBox.SelectedIndex == 0)
+                    x = 0;
+                else
+                    x = 1;
+
+                //find Size based on sizeComboBox
+                switch (sizeComboBox.SelectedIndex)
+                {
+                    case 0:
+                        {
+                            y = 0;
+                            break;
+                        }
+                    case 1:
+                        {
+                            y = 1;
+                            break;
+                        }
+                    case 2:
+                        {
+                            y = 2;
+                            break;
+                        }
+                    case 3:
+                        {
+                            y = 3;
+                            break;
+                        }
+                }
+
+
+                smoothieCost = smoothieListDecimal[x, y]; //Smoothie Cost based on Array
+
+                // find topping cost
+                if (echinaceaCheckBox.Checked == true)
+                    toppingCost += toppings;
+                if (beePollenCheckBox.Checked == true)
+                    toppingCost += toppings;
+                if (energyBoosterCheckBox.Checked == true)
+                    toppingCost += toppings;
+
+                // find discount amount
+                if (preferredDiscountRadioButton.Checked == true)
+                    discountAmount = ((smoothieCost + toppingCost) * quantity) * preferredDiscount;
+                else if (couponDiscountRadioButton.Checked == true)
+                    discountAmount = ((smoothieCost + toppingCost) * quantity) * couponDiscount;
+                else if (noneDiscountRadioButton.Checked == true)
+                    discountAmount = ((smoothieCost + toppingCost) * quantity) * noDiscount;
+
+                // find subtotal, tax, and total amount due
+                subtotalAmount = ((smoothieCost + toppingCost) * quantity);
+                taxAmount = findSalesTax(subtotalAmount, discountAmount);
+                totalDue = (subtotalAmount - discountAmount) + taxAmount;
+
+
+                subTotalOutputLabel.Text = subtotalAmount.ToString("C");         // Sub Total output
+                extrasOutputLabel.Text = toppingCost.ToString("C");             // Extras Output
+                discountOutputLabel.Text = discountAmount.ToString("C");        // Discount Output
+                salesTaxOutputLabel.Text = taxAmount.ToString("C");             // Sales Tax Output
+                amountDueOutputLabel.Text = totalDue.ToString("C");            // Amount Due Output
+            }
+        }
+
+        //function for finding tax
+        private decimal findSalesTax(decimal subtotal, decimal discountAmount)
+        {
+            decimal tax;
+            tax = (subtotal - discountAmount) * salesTax; // apply discount amount before sales tax is calculated
+            return tax;
+        }
+
+        private void Clear() //create Clear Method
+        {
+            nameTextBox.Clear();
+            sizeComboBox.SelectedIndex = -1;
+            styleComboBox.SelectedIndex = -1;
+            echinaceaCheckBox.Checked = false;
+            beePollenCheckBox.Checked = false;
+            energyBoosterCheckBox.Checked = false;
+            noneDiscountRadioButton.Checked = true;
+            quantityTextBox.Clear();
+            subTotalOutputLabel.Text = "$0.00";
+            extrasOutputLabel.Text = "$0.00";
+            discountOutputLabel.Text = "$0.00";
+            salesTaxOutputLabel.Text = "$0.00";
+            amountDueOutputLabel.Text = "$0.00";
+            nameTextBox.Select(); //move cursor to nameTextBox
+        }
+        private void About() //create About Method
+        {
+            MessageBox.Show("Programmed By: VOID\nVOID\nCITC 1312 Final Project");
+        }
+        private void Exit() //create Exit Method
+        {
+            Environment.Exit(0);
+        }
+
+        private void calculateButton_Click(object sender, EventArgs e)
+        {
+            //Calculate Button
+            Calculate();
+        }
+
+        private void exitCtrlXToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Exit Menu Button
+            Exit();
+        }
+
+        private void aboutCtrlAToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //About Menu Button
+            About();
+        }
+
+        private void exitButton_Click(object sender, EventArgs e)
+        {
+            //Exit Button
+            Exit();
+        }
+
+        private void aboutButton_Click(object sender, EventArgs e)
+        {
+            //About Button
+            About();
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            //Clear Button
+            Clear();
+        }
+
+        private void clearCtrlRToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Clear Menu Button
+            Clear();
+        }
+
+        private void calculateCtrlCToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Calculate Menu Button
+            Calculate();
+        }
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            // About Key Command
+            if (e.Control && e.KeyCode.ToString() == "A")
+                About();
+            // Exit Key Command
+            if (e.Control && e.KeyCode.ToString() == "X")
+                Exit();
+            // Calculate Key Command
+            if (e.Control && e.KeyCode.ToString() == "C")
+                Calculate();
+            // Clear Key Command
+            if (e.Control && e.KeyCode.ToString() == "R")
+                Clear();
+            // Enter Key Command
+            if (e.KeyCode == Keys.Enter)
+            {
+                //Pressing Enter with all fields sufficently filled with make calulcation occur
+                Calculate();
+                e.SuppressKeyPress = true; // remove the annoying "Ding" when Enter key is pressed
+                nameTextBox.Select(); //move cursor back to nameTextBox for user to start next customer
+            }
+        }
+
+        private void quantityTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // restricts non numerical characters from being entered into quantityTextBox. Without this error would occur if non numerical 
+            // character was entered into quantityTextBox. This is also cleaner than doing a try-catch in my opinion. 
+            char number = e.KeyChar;
+            // 8 is backspace, 46 is delete allowing use to correct entry if done incorrectly. 
+            // 13 is Enter allowing to calculate without hitting calculate button; tab is still functional
+            if (!Char.IsDigit(number) && number != 8 && number != 46 && number != 13)
+            {
+                e.Handled = true;
+                // error message for trying to enter non numerical characters into quantityTextBox
+                MessageBox.Show("Please Enter Numeric Quantity Of Smoothies"); quantityTextBox.Select();
+            }
+        }
+
+        private void nameTextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // restricts non letter characters from being entered into nameTextBox. This is cleaner than doing a try-catch in my opinion.
+            char letter = e.KeyChar;
+
+            // 8 is backspace, 46 is delete allowing use to correct entry if done incorrectly, and 32 is spacebar for first and last names
+            // 13 is Enter allowing to calculate without hitting calculate button; tab is still functional
+            if (!Char.IsLetter (letter) && letter != 8 && letter != 46 && letter != 13 && letter != 32)
+            {
+                e.Handled = true;
+                // error message for trying to enter non letter characters in nameTextBox
+                MessageBox.Show("Please Enter Only Letters For Customer Name"); nameTextBox.Select();
+            }
+
+        }
+    }
+}
+    
+    
